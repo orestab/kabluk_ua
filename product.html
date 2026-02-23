@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KABLUK | Товар</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .product-page-container {
+        max-width: 1200px;
+        margin: 120px auto 50px;
+        padding: 20px;
+        display: flex;
+        gap: 40px;
+        position: relative;
+      }
+      .back-btn {
+        position: absolute;
+        top: -40px;
+        left: 20px;
+        text-decoration: none;
+        color: #000;
+        font-weight: bold;
+      }
+      .product-images {
+        flex: 1.2;
+      }
+      .main-img-holder img {
+        width: 100%;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+      .thumbnails-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .thumb-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 5px;
+      }
+      .thumb-img.active {
+        border-color: #000;
+      }
+      .product-details {
+        flex: 1;
+      }
+      .product-price {
+        font-size: 24px;
+        color: #e44d26;
+        font-weight: bold;
+        margin: 20px 0;
+      }
+      .nav-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.7);
+        border: none;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        border-radius: 50%;
+        z-index: 10;
+      }
+      .nav-arrow.left {
+        left: 10px;
+      }
+      .nav-arrow.right {
+        right: 10px;
+      }
+      @media (max-width: 768px) {
+        .product-page-container {
+          flex-direction: column;
+          margin-top: 80px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay" id="overlay"></div>
+
+    <nav class="side-panel" id="side-panel">
+      <div class="panel-header">
+        <button class="close-btn" id="close-btn">&times;</button>
+      </div>
+      <ul class="panel-links">
+        <li><a href="catalog.html">КАТАЛОГ</a></li>
+        <li><a href="men.html">ЧОЛОВІЧИЙ</a></li>
+        <li><a href="women.html">ЖІНОЧИЙ</a></li>
+        <li><a href="sale.html">SALE</a></li>
+      </ul>
+    </nav>
+
+    <div id="fav-panel" class="side-panel right-side">
+      <h3>ВИБРАНЕ</h3>
+      <div id="fav-items"></div>
+      <button onclick="closePanels()" class="close-menu-btn">ЗАКРИТИ</button>
+    </div>
+
+    <div id="cart-panel" class="side-panel right-side">
+      <h3>ВАШ КОШИК</h3>
+      <div id="cart-items"></div>
+      <div id="cart-total" style="margin-top: 20px; font-weight: bold">
+        Разом: 0 грн
+      </div>
+      <button onclick="closePanels()" class="close-menu-btn">ЗАКРИТИ</button>
+    </div>
+
+    <header class="header">
+      <div class="nav-left">
+        <a href="#" id="burger-trigger"><img src="burger.png" alt="Menu" /></a>
+      </div>
+      <div class="nav-center">
+        <a href="index.html"><img src="logo.png" alt="Logo" class="logo" /></a>
+      </div>
+      <div class="nav-right">
+        <div class="nav-icons">
+          <div id="fav-trigger" class="icon-wrapper">
+            <img src="heart-empty.png" id="main-heart" alt="Wishlist" />
+            <span id="fav-count" class="badge-count">0</span>
+          </div>
+          <div id="cart-trigger" class="icon-wrapper">
+            <img src="cart.png" alt="Cart" />
+            <span id="cart-count" class="badge-count">0</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="product-page-container">
+      <a href="javascript:history.back()" class="back-btn">← НАЗАД</a>
+      <div class="product-images">
+        <div class="main-img-holder" style="position: relative">
+          <button class="nav-arrow left" onclick="changeImageStep(-1)">
+            &#10094;
+          </button>
+          <img id="main-product-img" src="" alt="Товар" />
+          <button class="nav-arrow right" onclick="changeImageStep(1)">
+            &#10095;
+          </button>
+        </div>
+        <div id="product-images-thumbnails" class="thumbnails-container"></div>
+      </div>
+
+      <div class="product-details">
+        <div style="display: flex; justify-content: space-between">
+          <h1 id="p-name">Завантаження...</h1>
+          <button
+            id="fav-btn-main"
+            style="background: none; border: none; cursor: pointer"
+          >
+            <img src="heart-empty.png" id="fav-icon-main" style="width: 30px" />
+          </button>
+        </div>
+        <p class="product-price" id="p-price"></p>
+        <div
+          class="product-meta"
+          style="margin-bottom: 20px; font-size: 14px; color: #666"
+        >
+          <p><strong>Стать:</strong> <span id="p-gender">-</span></p>
+          <p><strong>Категорія:</strong> <span id="p-category">-</span></p>
+        </div>
+        <div class="product-desc" id="p-desc"></div>
+        <div
+          style="
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            margin-top: 20px;
+          "
+        >
+          <label>ОБЕРІТЬ РОЗМІР:</label>
+          <select
+            id="size-selector-main"
+            class="size-selector"
+            style="width: 100%; margin: 10px 0; padding: 10px"
+          ></select>
+          <button
+            id="add-to-cart-main"
+            class="buy-btn"
+            style="
+              width: 100%;
+              padding: 15px;
+              background: #000;
+              color: #fff;
+              border: none;
+              font-weight: bold;
+              cursor: pointer;
+            "
+          >
+            ДОДАТИ В КОШИК
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+    <script type="module" src="product-detail.js"></script>
+  </body>
+</html>

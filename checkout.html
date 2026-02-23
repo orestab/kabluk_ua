@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Оформлення замовлення</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .checkout-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .checkout-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .checkbox-group input {
+        width: auto;
+      }
+      .order-summary {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+      }
+      .confirm-btn {
+        width: 100%;
+        padding: 15px;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 20px;
+      }
+      .checkout-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .checkout-item img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+      }
+
+      .checkout-item-info {
+        flex-grow: 1;
+      }
+
+      .checkout-item-info h4 {
+        font-size: 14px;
+        margin: 0;
+        text-transform: uppercase;
+      }
+
+      .checkout-item-info p {
+        font-size: 12px;
+        color: #666;
+        margin: 2px 0;
+      }
+
+      .total-price-block {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        text-align: right;
+      }
+
+      .remove-item-btn {
+        background: none;
+        border: none;
+        color: #ff4d4d;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 5px 10px;
+        transition: 0.3s;
+        margin-left: 10px;
+      }
+
+      .remove-item-btn:hover {
+        color: #b30000;
+        transform: scale(1.2);
+      }
+
+      .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 5px;
+      }
+
+      .qty-btn {
+        background: #eee;
+        border: none;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .qty-btn:hover {
+        background: #ddd;
+      }
+
+      .qty-num {
+        font-weight: bold;
+        font-size: 14px;
+        min-width: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="checkout-container">
+      <h2>ОФОРМЛЕННЯ ЗАМОВЛЕННЯ</h2>
+      <form id="checkout-form">
+        <div class="form-group">
+          <label>Прізвище, Ім'я, По батькові</label>
+          <input
+            type="text"
+            id="cust-name"
+            placeholder="Іванов Іван Іванович"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Номер телефону</label>
+          <input type="tel" id="cust-phone" placeholder="+380..." required />
+        </div>
+        <div class="form-group">
+          <label>Спосіб доставки</label>
+          <select id="delivery-method" required>
+            <option value="Нова Пошта">Нова Пошта</option>
+            <option value="Укрпошта">Укрпошта</option>
+            <option value="Meest">Meest</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Місто</label>
+          <input
+            type="text"
+            id="cust-city"
+            placeholder="Наприклад: Київ"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Номер відділення (або адреса)</label>
+          <input
+            type="text"
+            id="cust-office"
+            placeholder="Відділення №1 або вул. Шевченка, 10"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Спосіб оплати</label>
+          <select id="payment-method" required>
+            <option value="" disabled selected>Оберіть спосіб оплати</option>
+            <option value="Післяплата (накладений платіж)">
+              Післяплата (накладений платіж)
+            </option>
+            <option value="Часткова передоплата (150 грн)">
+              Часткова передоплата (150 грн)
+            </option>
+            <option value="Повна оплата">Повна оплата (на картку)</option>
+          </select>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="need-contact" />
+          <label for="need-contact"
+            >Зв'язатися зі мною в текстовому форматі для уточнення</label
+          >
+        </div>
+
+        <div class="order-summary" id="order-sum"></div>
+
+        <button type="submit" class="confirm-btn">
+          ПІДТВЕРДИТИ ЗАМОВЛЕННЯ
+        </button>
+      </form>
+    </div>
+
+    <script type="module" src="checkout.js"></script>
+  </body>
+</html>

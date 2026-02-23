@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>KABLUK | МОЇ ЗАМОВЛЕННЯ</title>
+    <style>
+      /* Локальні стилі для сторінки замовлень */
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #fff;
+      }
+
+      .page-content {
+        padding-top: 50px;
+        min-height: 80vh;
+      }
+
+      .back-nav {
+        max-width: 800px;
+        margin: 0 auto 20px;
+        padding: 0 20px;
+      }
+
+      .back-btn {
+        text-decoration: none;
+        color: #000;
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        transition: 0.3s;
+        display: inline-block;
+      }
+
+      .back-btn:hover {
+        opacity: 0.6;
+        transform: translateX(-5px);
+      }
+
+      .page-title {
+        text-align: center;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        margin-bottom: 40px;
+        font-size: 24px;
+      }
+
+      .orders-container {
+        max-width: 800px;
+        margin: 0 auto 50px;
+        padding: 0 20px;
+      }
+
+      /* Картка замовлення */
+      .order-card {
+        border: 1px solid #000;
+        padding: 25px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        position: relative;
+      }
+
+      .order-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+      }
+
+      .order-number {
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      .order-date {
+        color: #888;
+        font-size: 14px;
+      }
+
+      .order-items {
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .order-total {
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 5px;
+      }
+
+      .order-status {
+        display: inline-block;
+        padding: 4px 8px;
+        background: #f4f4f4;
+        font-size: 12px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      /* Кнопка відмінити */
+      .cancel-order-btn {
+        align-self: flex-start;
+        background: #fff;
+        border: 1px solid #ff0000;
+        color: #ff0000;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        transition: 0.3s;
+      }
+
+      .cancel-order-btn:hover {
+        background: #ff0000;
+        color: #fff;
+      }
+
+      /* Повідомлення про порожній список */
+      .no-orders {
+        text-align: center;
+        padding: 100px 20px;
+      }
+
+      .no-orders p {
+        font-size: 14px;
+        letter-spacing: 2px;
+        color: #888;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay" id="overlay"></div>
+
+    <main class="page-content">
+      <div class="back-nav">
+        <a href="index.html" class="back-btn">← Назад до магазину</a>
+      </div>
+
+      <h2 class="page-title">Мої замовлення</h2>
+
+      <div class="orders-container" id="orders-list"></div>
+    </main>
+
+    <script type="module" src="script.js"></script>
+    <script>
+      const ordersList = document.getElementById("orders-list");
+
+      // Твої дані Telegram
+      const TELEGRAM_BOT_TOKEN =
+        "8538424384:AAGGmG6G-zKTNJ1lwzfSrqygTv1i5VH6Jro";
+      const TELEGRAM_CHAT_ID = "5151112559";
+
+      function renderOrders() {
+        const orders = JSON.parse(localStorage.getItem("userOrders")) || [];
+
+        if (orders.length === 0) {
+          ordersList.innerHTML = `
+                <div class="no-orders">
+                    <p>У ВАС ПОКИ НЕМАЄ ЗАМОВЛЕНЬ</p>
+                    <a href="catalog.html" class="back-btn" style="border: 1px solid #000; padding: 10px 20px;">ПЕРЕЙТИ ДО КАТАЛОГУ</a>
+                </div>
+            `;
+          return;
+        }
+
+        ordersList.innerHTML = orders
+          .map(
+            (order) => `
+                <div class="order-card" id="order-${order.id}">
+                    <div class="order-info">
+                        <div>
+                            <div class="order-number">№${order.id}</div>
+                            <div class="order-date">${order.date}</div>
+                        </div>
+                        <div class="order-status">В обробці</div>
+                    </div>
+                    <div class="order-items">
+                        <strong>Товари:</strong> ${Array.isArray(order.items) ? order.items.join(", ") : order.items}
+                    </div>
+                    <div class="order-total">СУМА: ${order.total} ГРН</div>
+                    <button class="cancel-order-btn" onclick="cancelOrder('${order.id}', '${order.total}')">ВІДМІНИТИ ЗАМОВЛЕННЯ</button>
+                </div>
+            `,
+          )
+          .reverse()
+          .join("");
+      }
+
+      // ФУНКЦІЯ ВІДМІНИ ЗІ СПОВІЩЕННЯМ
+      window.cancelOrder = async function (id, total) {
+        if (confirm("Ви впевнені, що хочете скасувати це замовлення?")) {
+          let orders = JSON.parse(localStorage.getItem("userOrders")) || [];
+
+          // Знаходимо замовлення для сповіщення перед видаленням
+          const orderToCancel = orders.find((o) => String(o.id) === String(id));
+
+          if (orderToCancel) {
+            // Відправка сповіщення в Telegram
+            await sendCancellationTelegram(orderToCancel);
+
+            // Видаляємо з пам'яті
+            orders = orders.filter((o) => String(o.id) !== String(id));
+            localStorage.setItem("userOrders", JSON.stringify(orders));
+
+            alert("Замовлення скасовано. Адміністратор отримав сповіщення.");
+            renderOrders();
+          }
+        }
+      };
+
+      // Функція відправки в Telegram
+      async function sendCancellationTelegram(order) {
+        const message = `
+❌ **ЗАМОВЛЕННЯ СКАСОВАНО КЛІЄНТОМ** ❌
+━━━━━━━━━━━━━━━━━━
+🔢 **Номер:** №${order.id}
+📅 **Дата:** ${order.date}
+💰 **Сума була:** ${order.total} грн
+🛍️ **Товари:** ${Array.isArray(order.items) ? order.items.join(", ") : order.items}
+━━━━━━━━━━━━━━━━━━
+⚠️ *Клієнт натиснув кнопку "Відмінити" в особистому кабінеті.*
+`;
+
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+        try {
+          await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: TELEGRAM_CHAT_ID,
+              text: message,
+              parse_mode: "Markdown",
+            }),
+          });
+        } catch (err) {
+          console.error("Помилка Telegram:", err);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", renderOrders);
+    </script>
+  </body>
+</html>

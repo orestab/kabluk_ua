@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>KABLUK</title>
+  </head>
+  <body>
+    <div class="overlay" id="overlay"></div>
+
+    <nav class="side-panel" id="side-panel">
+      <div class="panel-header">
+        <button class="close-btn" id="close-btn">&times;</button>
+      </div>
+      <ul class="panel-links">
+        <li><a href="catalog.html">КАТАЛОГ</a></li>
+        <li><a href="men.html">ЧОЛОВІЧИЙ</a></li>
+        <li><a href="women.html">ЖІНОЧИЙ</a></li>
+        <li><a href="sale.html">SALE</a></li>
+      </ul>
+    </nav>
+
+    <div id="fav-panel" class="fav-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>ВИБРАНЕ</h3>
+          <button onclick="closePanels()" class="close-modal-x">&times;</button>
+        </div>
+
+        <div id="fav-items"></div>
+      </div>
+    </div>
+
+    <div id="cart-panel" class="cart-modal">
+      <div class="modal-header">
+        <h3>КОШИК</h3>
+        <button onclick="closePanels()" class="close-modal-x">&times;</button>
+      </div>
+      <div id="cart-items"></div>
+      <div class="modal-footer">
+        <div id="cart-total">Разом: 0 грн</div>
+      </div>
+    </div>
+
+    <header class="header">
+      <div class="nav-left">
+        <a href="#" id="burger-trigger">
+          <img src="burger.png" alt="Menu" />
+        </a>
+      </div>
+
+      <div class="nav-center">
+        <a href="index.html">
+          <img src="logo.png" alt="Logo" class="logo" />
+        </a>
+      </div>
+
+      <div class="nav-right">
+        <div class="nav-icons">
+          <div id="fav-trigger" class="icon-wrapper">
+            <img src="heart-empty.png" id="main-heart" alt="Wishlist" />
+            <span id="fav-count" class="badge-count">0</span>
+          </div>
+
+          <div id="cart-trigger" class="icon-wrapper">
+            <img src="cart.png" alt="Cart" />
+            <span id="cart-count" class="badge-count">0</span>
+          </div>
+        </div>
+
+        <div class="profile-container">
+          <a href="#" id="auth-trigger">
+            <img src="register.png" alt="Account" />
+          </a>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <p id="display-email">Користувач</p>
+            <div class="dropdown-divider"></div>
+            <a href="orders.html" class="orders-link-btn">МОЇ ЗАМОВЛЕННЯ</a>
+            <button onclick="handleLogout()" class="logout-btn">
+              ВИЙТИ З ПРОФІЛЮ
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <img src="hero.png" alt="Каблук" />
+      </section>
+
+      <section class="products-section">
+        <div id="catalog-container" class="products-grid"></div>
+      </section>
+
+      <section class="about">
+        <h2 class="about-title">ПРО НАС</h2>
+        <div class="about-content">
+          <p>
+            Ми український бренд, що поєднує мінімалізм, якість та сучасну
+            естетику. Кожна пара створена з увагою до деталей та комфорту.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <h2 class="brand-name">KABLUK</h2>
+        <p class="est">ESTABLISHED 2026</p>
+        <a href="https://t.me/kabulkks" target="_blank" class="tg-btn"
+          >FOLLOW ON TELEGRAM</a
+        >
+        <div class="footer-links">
+          <a href="#">Про нас</a>
+          <a href="#">Доставка</a>
+          <a href="#">Повернення</a>
+          <a href="#">Контакти</a>
+        </div>
+        <p class="copyright">© 2026 KABLUK. ALL RIGHTS RESERVED.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+  </body>
+</html>

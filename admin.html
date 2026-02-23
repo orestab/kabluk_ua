@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>KABLUK | Адмін-панель</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Твої стилі залишаються без змін */
+      .admin-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: inherit;
+      }
+      .submit-btn {
+        width: 100%;
+        padding: 15px;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .admin-product-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: #f9f9f9;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        border: 1px solid #eee;
+      }
+      .admin-product-item img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+      }
+      .del-btn {
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-container">
+      <a
+        href="index.html"
+        style="
+          display: inline-block;
+          margin-bottom: 20px;
+          color: #666;
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: bold;
+        "
+      >
+        ← ПОВЕРНУТИСЯ НА САЙТ
+      </a>
+      <h2>ДОДАТИ ТОВАР (ЧЕРЕЗ ПОСИЛАННЯ)</h2>
+      <form id="productForm">
+        <div class="form-group">
+          <label>Назва товару</label>
+          <input
+            type="text"
+            id="productName"
+            placeholder="Чорні туфлі"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Посилання на фото (через кому, якщо кілька)</label>
+          <textarea
+            id="productImagesLinks"
+            placeholder="https://site.com/1.jpg, https://site.com/2.jpg"
+            rows="3"
+            required
+          ></textarea>
+          <small style="color: gray">Перше посилання буде головним фото</small>
+        </div>
+
+        <div class="form-group">
+          <label>Опис</label>
+          <textarea id="productDescription" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Ціна (грн)</label>
+          <input type="number" id="productPrice" placeholder="2500" required />
+        </div>
+
+        <div class="form-group">
+          <label>Для кого</label>
+          <select id="productGender">
+            <option value="Чоловіча">Чоловіча</option>
+            <option value="Жіноча">Жіноча</option>
+            <option value="Унісекс">Унісекс</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Категорія</label>
+          <select id="productCategory">
+            <option value="Взуття">Взуття</option>
+            <option value="Футболка">Футболка</option>
+            <option value="Кофта">Кофта</option>
+            <option value="Худі">Худі</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Розміри (через кому)</label>
+          <input
+            type="text"
+            id="productSizes"
+            placeholder="37, 38, 40"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <input type="checkbox" id="productSale" />
+          <label for="productSale" style="display: inline"
+            >Товар зі знижкою (SALE)</label
+          >
+        </div>
+
+        <button type="submit" class="submit-btn">ОПУБЛІКУВАТИ ТОВАР</button>
+      </form>
+
+      <div id="adminProductList"></div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        deleteDoc,
+        doc,
+        serverTimestamp,
+        query,
+        orderBy,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBExbeBYRDVqCQJSTTBfaClnFm9j3Pj4Dw",
+        authDomain: "kablukshop-b4d83.firebaseapp.com",
+        projectId: "kablukshop-b4d83",
+        storageBucket: "kablukshop-b4d83.firebasestorage.app",
+        messagingSenderId: "785435537015",
+        appId: "1:785435537015:web:bee97d152252706694e072",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const productForm = document.getElementById("productForm");
+
+      productForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const submitBtn = productForm.querySelector(".submit-btn");
+        submitBtn.disabled = true;
+        submitBtn.innerText = "ЗБЕРЕЖЕННЯ...";
+
+        try {
+          // Отримуємо рядок з посиланнями та перетворюємо в масив
+          const linksInput =
+            document.getElementById("productImagesLinks").value;
+          const imagesArray = linksInput
+            .split(",")
+            .map((link) => link.trim())
+            .filter((link) => link !== "");
+
+          if (imagesArray.length === 0)
+            throw new Error("Введіть хоча б одне посилання!");
+
+          const productData = {
+            name: document.getElementById("productName").value.trim(),
+            description: document.getElementById("productDescription").value,
+            price: Number(document.getElementById("productPrice").value),
+            images: imagesArray, // Всі фото
+            img: imagesArray[0], // Головне фото (перше)
+            gender: document.getElementById("productGender").value,
+            category: document.getElementById("productCategory").value,
+            isSale: document.getElementById("productSale").checked,
+            sizes: document
+              .getElementById("productSizes")
+              .value.split(",")
+              .map((s) => s.trim())
+              .filter((s) => s !== ""),
+            createdAt: serverTimestamp(),
+          };
+
+          await addDoc(collection(db, "products"), productData);
+
+          alert("Товар додано!");
+          productForm.reset();
+          loadProducts();
+        } catch (error) {
+          alert("Помилка: " + error.message);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "ОПУБЛІКУВАТИ ТОВАР";
+        }
+      });
+
+      async function loadProducts() {
+        const productList = document.getElementById("adminProductList");
+        productList.innerHTML = "<p>Оновлення...</p>";
+        try {
+          const q = query(
+            collection(db, "products"),
+            orderBy("createdAt", "desc"),
+          );
+          const querySnapshot = await getDocs(q);
+          productList.innerHTML = "<h3>ВЖЕ НА САЙТІ:</h3>";
+
+          querySnapshot.forEach((docSnap) => {
+            const p = docSnap.data();
+            const item = document.createElement("div");
+            item.className = "admin-product-item";
+            item.innerHTML = `
+                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/60'">
+                        <div style="flex-grow:1">
+                            <strong>${p.name}</strong><br>
+                            <small>${p.price} грн</small>
+                        </div>
+                        <button class="del-btn" data-id="${docSnap.id}">Видалити</button>
+                    `;
+            productList.appendChild(item);
+          });
+
+          document.querySelectorAll(".del-btn").forEach((btn) => {
+            btn.onclick = async (e) => {
+              if (confirm("Видалити?")) {
+                await deleteDoc(doc(db, "products", e.target.dataset.id));
+                loadProducts();
+              }
+            };
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      loadProducts();
+    </script>
+  </body>
+</html>

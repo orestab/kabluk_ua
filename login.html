@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>KABLUK - Авторизація</title>
+    <style>
+      .auth-container {
+        max-width: 400px;
+        margin: 80px auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+      .auth-container h2 {
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+      }
+      .auth-input {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .auth-btn {
+        width: 100%;
+        padding: 12px;
+        background: #000;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        margin-top: 15px;
+        font-weight: bold;
+      }
+      .switch-btn {
+        margin-top: 20px;
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 13px;
+      }
+      .error-msg {
+        color: #ff4444;
+        font-size: 13px;
+        margin-top: 10px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body style="background: #e9e9e9">
+    <div class="auth-container">
+      <h2 id="auth-title">ВХІД</h2>
+
+      <input
+        type="email"
+        id="email"
+        class="auth-input"
+        placeholder="Email"
+        required
+      />
+      <input
+        type="password"
+        id="password"
+        class="auth-input"
+        placeholder="Пароль"
+        required
+      />
+
+      <div id="error-box" class="error-msg"></div>
+
+      <button class="auth-btn" id="main-btn" onclick="processAuth()">
+        УВІЙТИ
+      </button>
+
+      <button class="switch-btn" id="switch-mode" onclick="toggleMode()">
+        Немає акаунту? Зареєструватися
+      </button>
+      <br />
+      <a
+        href="index.html"
+        class="switch-btn"
+        style="display: inline-block; margin-top: 10px"
+        >Назад на головну</a
+      >
+    </div>
+
+    <script type="module">
+      // 1. Імпорт модулів Firebase
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+      // 2. Конфігурація Firebase (твоя актуальна версія)
+      const firebaseConfig = {
+        apiKey: "AIzaSyBExbeBYRDVqCQJSTTBfaClnFm9j3Pj4Dw",
+        authDomain: "kablukshop-b4d83.firebaseapp.com",
+        projectId: "kablukshop-b4d83",
+        storageBucket: "kablukshop-b4d83.firebasestorage.app",
+        messagingSenderId: "785435537015",
+        appId: "1:785435537015:web:bee97d152252706694e072",
+        measurementId: "G-ZZTSECBPM3",
+      };
+
+      // 3. Ініціалізація
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      let isLoginMode = true;
+
+      // 4. Функція перемикання Вхід / Реєстрація
+      window.toggleMode = function () {
+        isLoginMode = !isLoginMode;
+        const title = document.getElementById("auth-title");
+        const btn = document.getElementById("main-btn");
+        const switchText = document.getElementById("switch-mode");
+        const errorBox = document.getElementById("error-box");
+
+        if (title) title.innerText = isLoginMode ? "ВХІД" : "РЕЄСТРАЦІЯ";
+        if (btn) btn.innerText = isLoginMode ? "УВІЙТИ" : "ЗАРЕЄСТРУВАТИСЯ";
+        if (switchText)
+          switchText.innerText = isLoginMode
+            ? "Немає акаунту? Зареєструватися"
+            : "Вже є акаунт? Увійти";
+
+        if (errorBox) errorBox.style.display = "none";
+      };
+
+      // 5. Головна функція авторизації
+      window.processAuth = async function () {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const errorBox = document.getElementById("error-box");
+
+        if (!email || !password) {
+          showError("Заповніть усі поля!");
+          return;
+        }
+
+        try {
+          let userCredential;
+
+          if (isLoginMode) {
+            // --- ВХІД ---
+            userCredential = await signInWithEmailAndPassword(
+              auth,
+              email,
+              password,
+            );
+          } else {
+            // --- РЕЄСТРАЦІЯ ---
+            userCredential = await createUserWithEmailAndPassword(
+              auth,
+              email,
+              password,
+            );
+          }
+
+          const user = userCredential.user;
+
+          // ПЕРЕВІРКА НА АДМІНА
+          // Якщо пошта admin@admin.com, додаємо роль admin
+          const isAdmin = user.email.toLowerCase() === "admin@admin.com";
+
+          const userData = {
+            email: user.email,
+            role: isAdmin ? "admin" : "user",
+          };
+
+          // Зберігаємо сесію для головної сторінки
+          localStorage.setItem("currentUser", JSON.stringify(userData));
+
+          // Перенаправлення
+          window.location.href = "index.html";
+        } catch (error) {
+          console.error(error);
+          handleFirebaseError(error, errorBox);
+        }
+      };
+
+      // Допоміжна функція для виводу помилок
+      function showError(text) {
+        const errorBox = document.getElementById("error-box");
+        if (errorBox) {
+          errorBox.innerText = text;
+          errorBox.style.display = "block";
+        }
+      }
+
+      // Обробка технічних помилок Firebase
+      function handleFirebaseError(error, errorBox) {
+        errorBox.style.display = "block";
+        switch (error.code) {
+          case "auth/invalid-credential":
+            errorBox.innerText = "Невірна пошта або пароль!";
+            break;
+          case "auth/weak-password":
+            errorBox.innerText = "Пароль має бути не менше 6 символів!";
+            break;
+          case "auth/email-already-in-use":
+            errorBox.innerText = "Цей Email вже зайнятий!";
+            break;
+          case "auth/invalid-email":
+            errorBox.innerText = "Некоректний формат Email!";
+            break;
+          default:
+            errorBox.innerText = "Помилка: " + error.message;
+        }
+      }
+    </script>
+  </body>
+</html>
